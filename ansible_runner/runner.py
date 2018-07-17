@@ -270,21 +270,20 @@ class Runner(object):
                           instance's cancel_flag.
         '''
         try:
-            if proot_cmd and proot_cmd in ' '.join(args):
-                if not psutil:
-                    os.kill(pid, signal.SIGKILL)
-                else:
+            try:
+                main_proc = psutil.Process(pid=pid)
+                child_procs = main_proc.children(recursive=True)
+                for child_proc in child_procs:
                     try:
-                        main_proc = psutil.Process(pid=pid)
-                        child_procs = main_proc.children(recursive=True)
-                        for child_proc in child_procs:
-                            os.kill(child_proc.pid, signal.SIGKILL)
-                        os.kill(main_proc.pid, signal.SIGKILL)
-                    except (TypeError, psutil.Error):
-                        os.kill(pid, signal.SIGKILL)
-            else:
-                os.kill(pid, signal.SIGTERM)
-            time.sleep(3)
+                        child_proc.kill()
+                    except psutil.NoSuchProcess:
+                        pass
+                try:
+                    main_proc.kill()
+                except psutil.NoSuchProcess:
+                    pass
+            except (TypeError, psutil.Error):
+                os.kill(pid, signal.SIGKILL)
         except OSError:
             raise
             #keyword = 'cancel' if is_cancel else 'timeout'
