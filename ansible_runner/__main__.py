@@ -141,7 +141,7 @@ def role_manager(args):
             shutil.rmtree(env_path)
 
 
-def main():
+def main(sys_args=None):
     parser = argparse.ArgumentParser(description='manage ansible execution')
 
     parser.add_argument('--version', action='version', version=VERSION)
@@ -209,7 +209,7 @@ def main():
     parser.add_argument("-a", "--args", dest='module_args',
                         help="Module arguments")
 
-    args = parser.parse_args()
+    args = parser.parse_args(sys_args)
 
     output.configure()
 
@@ -274,13 +274,13 @@ def main():
                     run_options['cmdline'] = args.cmdline
 
                 res = run(**run_options)
-            sys.exit(res.rc)
+            return(res.rc)
 
     try:
         with open(pidfile, 'r') as f:
             pid = int(f.readline())
     except IOError:
-        sys.exit(1)
+        return(1)
 
     if args.command == 'stop':
         try:
@@ -292,6 +292,6 @@ def main():
     elif args.command == 'is-alive':
         try:
             os.kill(pid, signal.SIG_DFL)
-            sys.exit(0)
+            return(0)
         except OSError:
-            sys.exit(1)
+            return(1)
