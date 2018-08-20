@@ -181,10 +181,7 @@ def test_cmdline_playbook():
 
         cmdline('run', private_data_dir, '-p', playbook, '--inventory', inventory)
 
-        with raises(SystemExit) as exc:
-            main()
-            assert exc.type == SystemExit
-            assert exc.value.code == 0
+        assert main() == 0
 
         with open(playbook) as f:
             assert json.loads(f.read()) == play
@@ -217,10 +214,7 @@ def test_cmdline_playbook_hosts():
 
         cmdline('run', private_data_dir, '-p', playbook, '--hosts', 'all')
 
-        with raises(SystemExit) as exc:
-            main()
-            assert exc.type == SystemExit
-            assert exc.value.code == 0
+        assert main() == 4
 
         with open(playbook) as f:
             assert json.loads(f.read()) == play
